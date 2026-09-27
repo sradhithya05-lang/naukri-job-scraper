@@ -19,7 +19,7 @@ def home():
 def run_scraper():
     try:
         subprocess.Popen(
-            [sys.executable, "naukri_scraper.py"]
+            [sys.executable, "-u", "naukri_scraper.py"]
         )
 
         return """
