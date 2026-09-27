@@ -1,0 +1,38 @@
+2026-09-19 14:04:50,839 - INFO - Starting Naukri scraper
+2026-09-19 14:04:52,231 - INFO - Opening Naukri
+2026-09-19 14:04:57,656 - INFO - Naukri page opened successfully
+2026-09-19 14:04:58,066 - INFO - Browser closed
+2026-09-19 14:06:12,835 - INFO - Starting Naukri scraper
+2026-09-19 14:06:13,654 - INFO - Opening Naukri
+2026-09-19 14:06:19,441 - INFO - Naukri page opened successfully
+2026-09-19 14:06:19,798 - INFO - Browser closed
+2026-09-19 14:23:11,073 - INFO - Starting Naukri scraper
+2026-09-19 14:23:48,033 - INFO - Found 20 job cards
+2026-09-19 14:23:48,354 - INFO - Browser closed
+2026-09-19 14:28:00,695 - INFO - Starting Naukri scraper
+2026-09-19 14:28:07,300 - INFO - Job cards found: 20
+2026-09-19 14:28:08,504 - INFO - Added 20 new jobs
+2026-09-19 14:28:08,886 - INFO - Browser closed
+2026-09-19 14:31:59,763 - INFO - Starting Naukri scraper
+2026-09-19 14:32:06,404 - INFO - Job cards found: 20
+2026-09-19 14:32:07,826 - INFO - Added 2 new jobs
+2026-09-19 14:32:08,161 - INFO - Browser closed
+2026-09-19 14:35:26,460 - INFO - Starting Naukri scraper
+2026-09-19 14:35:33,376 - INFO - Job cards found: 20
+2026-09-19 14:35:34,465 - INFO - No new jobs found.
+2026-09-19 14:35:34,821 - INFO - Browser closed
+2026-09-27 14:54:45,246 - INFO - Starting Naukri scraper
+2026-09-27 14:55:01,081 - INFO - Job cards found: 0
+2026-09-27 14:55:01,121 - INFO - Browser closed
+2026-09-27 14:56:59,742 - INFO - Starting Naukri scraper
+2026-09-27 14:57:07,299 - INFO - Job cards found: 20
+2026-09-27 14:57:08,425 - INFO - Added 18 new jobs
+2026-09-27 14:57:08,915 - INFO - Browser closed
+2026-09-27 14:58:49,858 - INFO - Starting Naukri scraper
+2026-09-27 14:58:55,946 - INFO - Job cards found: 20
+2026-09-27 14:58:56,978 - INFO - No new jobs found.
+2026-09-27 14:58:57,278 - INFO - Browser closed
+2026-09-27 17:52:32,695 - INFO - Starting Naukri scraper
+2026-09-27 17:52:39,176 - INFO - Job cards found: 20
+2026-09-27 17:52:40,173 - INFO - No new jobs found.
+2026-09-27 17:52:40,573 - INFO - Browser closed
