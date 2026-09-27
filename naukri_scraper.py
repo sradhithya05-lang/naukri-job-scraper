@@ -349,7 +349,7 @@ async def scrape_naukri():
     async with async_playwright() as p:
 
         browser = await p.chromium.launch(
-            headless=True
+            headless=False
         )
 
         page = await browser.new_page()
