@@ -10,7 +10,7 @@ app = Flask(__name__)
 def home():
     return """
     <h1>Naukri Job Scraper</h1>
-    <p>Application deployed successfully on Railway.</p>
+    <p>Application deployed successfully on Vercel.</p>
     <p><a href="/scrape">Run Naukri Scraper</a></p>
     """
 
@@ -25,7 +25,7 @@ def run_scraper():
         return """
         <h1>Scraper Started</h1>
         <p>The Naukri scraper has been started.</p>
-        <p>Check Railway logs for the scraping progress.</p>
+        <p>Scraping request received.</p>
         """
 
     except Exception as e:
