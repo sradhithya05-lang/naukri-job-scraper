@@ -159,19 +159,19 @@ async def scrape_naukri():
                 timeout=60000
             )
 
-            print("Page loaded successfully.")
-            print("Page title:", await page.title())
-            print("Current URL:", page.url)
+            print("Page loaded successfully.", flush=True)
+            print("Page title:", await page.title(), flush=True)
+            print("Current URL:", page.url, flush=True)
 
             await page.wait_for_timeout(15000)
 
-            print("Page text:", (await page.locator("body").inner_text())[:1000])
+            print("Page text:", (await page.locator("body").inner_text())[:1000], flush=True)
 
             cards = page.locator("div.srp-jobtuple-wrapper")
 
             job_count = await cards.count()
 
-            print(f"Job cards found: {job_count}")
+            print(f"Job cards found: {job_count}", flush=True)
 
             for i in range(job_count):
                 job = await extract_job(cards.nth(i))
