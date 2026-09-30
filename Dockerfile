@@ -12,4 +12,6 @@ RUN python -m playwright install --with-deps chromium
 
 COPY . .
 
+EXPOSE 10000
+
 CMD ["xvfb-run", "-a", "gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
