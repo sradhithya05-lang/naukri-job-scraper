@@ -15,4 +15,4 @@ RUN python -m playwright install --with-deps chromium
 
 COPY . .
 
-CMD ["xvfb-run", "--auto-servernum", "python", "app.py"]
+CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x720x24", "python", "app.py"]
