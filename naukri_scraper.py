@@ -138,18 +138,20 @@ def save_jobs_to_excel(jobs):
         logging.error("Error saving Excel file: %s", e)
         print(f"Error saving Excel file: {e}")
 async def scrape_naukri():
-    print("Opening Naukri...")
+    print("Opening Naukri...", flush=True)
 
     jobs = []
 
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(
-               headless=True,
-               args=[
-        "--disable-blink-features=AutomationControlled"
-    ]
-)
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage"
+                ]
+            )
 
             page = await browser.new_page()
 
@@ -160,15 +162,19 @@ async def scrape_naukri():
             )
 
             print("Page loaded successfully.", flush=True)
-            print("Page title:", await page.title(), flush=True)
-            print("Current URL:", page.url, flush=True)
+
+            page_title = await page.title()
+            current_url = page.url
 
             await page.wait_for_timeout(15000)
 
-            print("Page text:", (await page.locator("body").inner_text())[:1000], flush=True)
+            page_text = (await page.locator("body").inner_text())[:2000]
+
+            print("Page title:", page_title, flush=True)
+            print("Current URL:", current_url, flush=True)
+            print("Page text:", page_text, flush=True)
 
             cards = page.locator("div.srp-jobtuple-wrapper")
-
             job_count = await cards.count()
 
             print(f"Job cards found: {job_count}", flush=True)
@@ -180,29 +186,31 @@ async def scrape_naukri():
                     jobs.append(job)
                     print(
                         f"Scraped job {len(jobs)}: "
-                        f"{job.get('Job Title', '')}"
+                        f"{job.get('Job Title', '')}",
+                        flush=True
                     )
 
-            print(f"Jobs scraped: {len(jobs)}")
+            print(f"Jobs scraped: {len(jobs)}", flush=True)
 
             await browser.close()
 
         if jobs:
             save_jobs_to_excel(jobs)
         else:
-            print("No jobs found.")
+            print("No jobs found.", flush=True)
 
-        print("Scraping completed successfully.")
+        print("Scraping completed successfully.", flush=True)
 
         return (
+            f"Page title: {page_title}\n\n"
+            f"Current URL: {current_url}\n\n"
+            f"Page text:\n{page_text}\n\n"
             f"Job cards found: {job_count}\n"
-            f"Jobs scraped: {len(jobs)}\n"
+            f"Jobs scraped: {len(jobs)}\n\n"
             f"Scraping completed successfully."
         )
 
     except Exception as e:
         logging.error("Scraper error: %s", e)
-        print(f"Scraper error: {e}")
+        print(f"Scraper error: {e}", flush=True)
         raise
-if __name__ == "__main__":
-    asyncio.run(scrape_naukri())
