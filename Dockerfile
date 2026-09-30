@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM mcr.microsoft.com/playwright/python:v1.63.0-noble
 
 WORKDIR /app
 
@@ -6,12 +6,8 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN apt-get update && apt-get install -y xvfb
-
-RUN python -m playwright install --with-deps chromium
-
 COPY . .
 
 EXPOSE 10000
 
-CMD ["xvfb-run", "-a", "gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--workers", "1", "--timeout", "300", "app:app"]
