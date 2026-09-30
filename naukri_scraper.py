@@ -1,3 +1,4 @@
+```python
 import asyncio
 import logging
 import os
@@ -382,6 +383,11 @@ async def scrape_naukri():
                 await page.title()
             )
 
+            print(
+                "Current URL:",
+                page.url
+            )
+
             # ------------------------------------------------
             # Find job cards
             # ------------------------------------------------
@@ -461,7 +467,6 @@ async def scrape_naukri():
                 e
             )
 
-            # Send the error back to Flask
             raise
 
         finally:
@@ -482,3 +487,4 @@ if __name__ == "__main__":
     asyncio.run(
         scrape_naukri()
     )
+```
