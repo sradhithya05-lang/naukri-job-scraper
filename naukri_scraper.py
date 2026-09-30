@@ -35,11 +35,10 @@ format="%(asctime)s - %(levelname)s - %(message)s"
 
 def clean_text(text):
 """Remove unnecessary spaces from text."""
+if not text:
+return ""
 
 ```
-if not text:
-    return ""
-
 return " ".join(text.split())
 ```
 
@@ -51,11 +50,10 @@ return " ".join(text.split())
 
 def extract_job_id(url):
 """Extract a Naukri job ID from the job URL."""
+if not url:
+return ""
 
 ```
-if not url:
-    return ""
-
 match = re.search(r"-(\d{6,})", url)
 
 if match:
@@ -505,4 +503,4 @@ if **name** == "**main**":
 asyncio.run(
     scrape_naukri()
 )
-
+```
