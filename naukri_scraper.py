@@ -6,501 +6,203 @@ import re
 import pandas as pd
 from playwright.async_api import async_playwright
 
-# ============================================================
-
-# CONFIGURATION
-
-# ============================================================
 
 BASE_URL = "https://www.naukri.com/python-developer-jobs"
 EXCEL_FILE = "naukri_jobs.xlsx"
 
-# ============================================================
-
-# LOGGING
-
-# ============================================================
 
 logging.basicConfig(
-filename="scraper.log",
-level=logging.INFO,
-format="%(asctime)s - %(levelname)s - %(message)s"
+    filename="scraper.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# ============================================================
-
-# HELPER FUNCTION
-
-# ============================================================
 
 def clean_text(text):
-"""Remove unnecessary spaces from text."""
-if not text:
-return ""
+    if not text:
+        return ""
 
-```
-return " ".join(text.split())
-```
+    return " ".join(text.split())
 
-# ============================================================
-
-# EXTRACT JOB ID
-
-# ============================================================
 
 def extract_job_id(url):
-"""Extract a Naukri job ID from the job URL."""
-if not url:
-return ""
+    if not url:
+        return ""
 
-```
-match = re.search(r"-(\d{6,})", url)
+    match = re.search(r"-(\d{6,})", url)
 
-if match:
-    return match.group(1)
+    if match:
+        return match.group(1)
 
-return url
-```
-
-# ============================================================
-
-# EXTRACT JOB INFORMATION
-
-# ============================================================
-
+    return url
 async def extract_job(card):
-
-```
-try:
-
-    # -------------------------------
-    # Job title
-    # -------------------------------
-
-    title_locator = card.locator("a.title")
-
-    if await title_locator.count() > 0:
-
-        title = clean_text(
-            await title_locator.first.inner_text()
-        )
-
-        job_url = await title_locator.first.get_attribute(
-            "href"
-        )
-
-    else:
-
+    try:
         title = ""
+        company = ""
+        location = ""
+        experience = ""
+        skills = ""
+        posted_date = ""
         job_url = ""
 
-    # -------------------------------
-    # Company
-    # -------------------------------
+        title_element = card.locator("a.title").first
+        if await title_element.count() > 0:
+            title = clean_text(await title_element.inner_text())
+            job_url = await title_element.get_attribute("href") or ""
 
-    company_locator = card.locator("a.comp-name")
+        company_element = card.locator("a.comp-name").first
+        if await company_element.count() > 0:
+            company = clean_text(await company_element.inner_text())
 
-    if await company_locator.count() > 0:
+        location_element = card.locator(".locWdth").first
+        if await location_element.count() > 0:
+            location = clean_text(await location_element.inner_text())
 
-        company = clean_text(
-            await company_locator.first.inner_text()
-        )
+        experience_element = card.locator(".expwdth").first
+        if await experience_element.count() > 0:
+            experience = clean_text(await experience_element.inner_text())
 
-    else:
+        skills_element = card.locator(".tags-gt").first
+        if await skills_element.count() > 0:
+            skills = clean_text(await skills_element.inner_text())
 
-        company = ""
+        posted_element = card.locator(".job-post-day").first
+        if await posted_element.count() > 0:
+            posted_date = clean_text(await posted_element.inner_text())
 
-    # -------------------------------
-    # Location
-    # -------------------------------
+        job_id = extract_job_id(job_url)
 
-    location_locator = card.locator(".locWdth")
+        return {
+            "Job ID": job_id,
+            "Job Title": title,
+            "Company": company,
+            "Location": location,
+            "Experience": experience,
+            "Skills": skills,
+            "Posted Date": posted_date,
+            "Job URL": job_url
+        }
 
-    if await location_locator.count() > 0:
-
-        location = clean_text(
-            await location_locator.first.inner_text()
-        )
-
-    else:
-
-        location = ""
-
-    # -------------------------------
-    # Experience
-    # -------------------------------
-
-    experience_locator = card.locator(".expwdth")
-
-    if await experience_locator.count() > 0:
-
-        experience = clean_text(
-            await experience_locator.first.inner_text()
-        )
-
-    else:
-
-        experience = ""
-
-    # -------------------------------
-    # Complete card text
-    # -------------------------------
-
-    card_text = clean_text(
-        await card.inner_text()
-    )
-
-    # -------------------------------
-    # Posted date
-    # -------------------------------
-
-    posted_date = ""
-
-    date_patterns = [
-        r"\b\d+\s+day[s]?\s+ago\b",
-        r"\b\d+\s+week[s]?\s+ago\b",
-        r"\b\d+\s+hour[s]?\s+ago\b",
-        r"\b\d+\s+month[s]?\s+ago\b",
-        r"\bToday\b",
-        r"\bYesterday\b",
-        r"\b\d{1,2}\s+[A-Za-z]{3}\b"
-    ]
-
-    for pattern in date_patterns:
-
-        match = re.search(
-            pattern,
-            card_text,
-            re.IGNORECASE
-        )
-
-        if match:
-
-            posted_date = match.group(0)
-            break
-
-    # -------------------------------
-    # Skills
-    # -------------------------------
-
-    skills_locator = card.locator(".tags-gt")
-
-    if await skills_locator.count() > 0:
-
-        skills = clean_text(
-            await skills_locator.first.inner_text()
-        )
-
-    else:
-
-        skills = ""
-
-    # -------------------------------
-    # Job ID
-    # -------------------------------
-
-    job_id = extract_job_id(job_url)
-
-    return {
-        "Job ID": job_id,
-        "Job Title": title,
-        "Company": company,
-        "Location": location,
-        "Experience": experience,
-        "Skills": skills,
-        "Posted Date": posted_date,
-        "Job URL": job_url
-    }
-
-except Exception as e:
-
-    logging.exception(
-        "Error extracting job: %s",
-        e
-    )
-
-    return None
-```
-
-# ============================================================
-
-# SAVE NEW JOBS TO EXCEL
-
-# ============================================================
-
+    except Exception as e:
+        logging.error("Error extracting job: %s", e)
+        return None
 def save_jobs_to_excel(jobs):
-
-```
-if not jobs:
-
-    print("No jobs found.")
-
-    return "No jobs found."
-
-new_df = pd.DataFrame(jobs)
-
-# --------------------------------------------------------
-# Remove duplicate jobs from current scraping
-# --------------------------------------------------------
-
-new_df = new_df.drop_duplicates(
-    subset=["Job URL"]
-)
-
-# --------------------------------------------------------
-# Read existing Excel file
-# --------------------------------------------------------
-
-if os.path.exists(EXCEL_FILE):
+    if not jobs:
+        print("No jobs to save.")
+        return
 
     try:
+        if os.path.exists(EXCEL_FILE):
+            existing_df = pd.read_excel(EXCEL_FILE)
+        else:
+            existing_df = pd.DataFrame()
 
-        existing_df = pd.read_excel(
-            EXCEL_FILE
-        )
+        new_df = pd.DataFrame(jobs)
 
-        print(
-            f"Existing jobs in Excel: {len(existing_df)}"
+        if existing_df.empty:
+            final_df = new_df
+            new_jobs_count = len(new_df)
+
+        else:
+            existing_urls = set(
+                existing_df["Job URL"].dropna().astype(str)
+            )
+
+            new_df = new_df[
+                ~new_df["Job URL"].astype(str).isin(existing_urls)
+            ]
+
+            new_jobs_count = len(new_df)
+
+            if new_df.empty:
+                final_df = existing_df
+            else:
+                final_df = pd.concat(
+                    [existing_df, new_df],
+                    ignore_index=True
+                )
+
+        final_df.to_excel(EXCEL_FILE, index=False)
+
+        print(f"Existing jobs in Excel: {len(existing_df)}")
+        print(f"New jobs added: {new_jobs_count}")
+        print(f"Total jobs in Excel: {len(final_df)}")
+
+        logging.info(
+            "Excel updated. New jobs: %s, Total jobs: %s",
+            new_jobs_count,
+            len(final_df)
         )
 
     except Exception as e:
-
-        logging.exception(
-            "Could not read Excel file: %s",
-            e
-        )
-
-        existing_df = pd.DataFrame()
-
-else:
-
-    existing_df = pd.DataFrame()
-
-# --------------------------------------------------------
-# Find new jobs
-# --------------------------------------------------------
-
-if not existing_df.empty:
-
-    existing_urls = set(
-        existing_df["Job URL"]
-        .dropna()
-        .astype(str)
-    )
-
-    new_df = new_df[
-        ~new_df["Job URL"].astype(str).isin(
-            existing_urls
-        )
-    ]
-
-# --------------------------------------------------------
-# No new jobs
-# --------------------------------------------------------
-
-if new_df.empty:
-
-    print("No new jobs found.")
-
-    logging.info(
-        "No new jobs found."
-    )
-
-    return (
-        f"Existing jobs in Excel: "
-        f"{len(existing_df)}\n"
-        f"No new jobs found."
-    )
-
-# --------------------------------------------------------
-# Save results
-# --------------------------------------------------------
-
-final_df = pd.concat(
-    [existing_df, new_df],
-    ignore_index=True
-)
-
-final_df = final_df.drop_duplicates(
-    subset=["Job URL"],
-    keep="first"
-)
-
-final_df.to_excel(
-    EXCEL_FILE,
-    index=False
-)
-
-print(
-    f"New jobs added: {len(new_df)}"
-)
-
-print(
-    f"Total jobs in Excel: {len(final_df)}"
-)
-
-logging.info(
-    "Added %s new jobs",
-    len(new_df)
-)
-
-return (
-    f"New jobs added: {len(new_df)}\n"
-    f"Total jobs in Excel: {len(final_df)}"
-)
-```
-
-# ============================================================
-
-# MAIN SCRAPER
-
-# ============================================================
-
+        logging.error("Error saving Excel file: %s", e)
+        print(f"Error saving Excel file: {e}")
 async def scrape_naukri():
+    print("Opening Naukri...")
 
-```
-logging.info(
-    "Starting Naukri scraper"
-)
-
-jobs = []
-
-async with async_playwright() as p:
-
-    browser = await p.chromium.launch(
-        headless=True
-    )
-
-    page = await browser.new_page()
+    jobs = []
 
     try:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(
+                headless=False,
+                args=[
+        "--disable-blink-features=AutomationControlled"
+    ]
+)
 
-        print("Opening Naukri...")
+            page = await browser.new_page()
 
-        await page.goto(
-            BASE_URL,
-            wait_until="domcontentloaded",
-            timeout=60000
-        )
-
-        await page.wait_for_timeout(
-            5000
-        )
-
-        print(
-            "Page loaded successfully."
-        )
-
-        print(
-            "Page title:",
-            await page.title()
-        )
-
-        print(
-            "Current URL:",
-            page.url
-        )
-
-        # ------------------------------------------------
-        # Find job cards
-        # ------------------------------------------------
-
-        job_cards = page.locator(
-            "div.srp-jobtuple-wrapper"
-        )
-
-        count = await job_cards.count()
-
-        print(
-            f"Job cards found: {count}"
-        )
-
-        logging.info(
-            "Job cards found: %s",
-            count
-        )
-
-        # ------------------------------------------------
-        # Extract jobs
-        # ------------------------------------------------
-
-        for i in range(count):
-
-            card = job_cards.nth(i)
-
-            job = await extract_job(
-                card
+            await page.goto(
+                BASE_URL,
+                wait_until="domcontentloaded",
+                timeout=60000
             )
 
-            if job:
+            print("Page loaded successfully.")
+            print("Page title:", await page.title())
+            print("Current URL:", page.url)
 
-                jobs.append(job)
+            await page.wait_for_timeout(15000)
 
-                print(
-                    f"Scraped job {i + 1}: "
-                    f"{job['Job Title']}"
-                )
+            print("Page text:", (await page.locator("body").inner_text())[:1000])
 
-        # ------------------------------------------------
-        # Save to Excel
-        # ------------------------------------------------
+            cards = page.locator("div.srp-jobtuple-wrapper")
 
-        print(
-            "\nSaving jobs to Excel..."
-        )
+            job_count = await cards.count()
 
-        save_result = save_jobs_to_excel(
-            jobs
-        )
+            print(f"Job cards found: {job_count}")
 
-        print(
-            "\nScraping completed successfully."
-        )
+            for i in range(job_count):
+                job = await extract_job(cards.nth(i))
 
-        # ------------------------------------------------
-        # Return result to Flask
-        # ------------------------------------------------
+                if job and job.get("Job URL"):
+                    jobs.append(job)
+                    print(
+                        f"Scraped job {len(jobs)}: "
+                        f"{job.get('Job Title', '')}"
+                    )
+
+            print(f"Jobs scraped: {len(jobs)}")
+
+            await browser.close()
+
+        if jobs:
+            save_jobs_to_excel(jobs)
+        else:
+            print("No jobs found.")
+
+        print("Scraping completed successfully.")
 
         return (
-            f"Job cards found: {count}\n"
+            f"Job cards found: {job_count}\n"
             f"Jobs scraped: {len(jobs)}\n"
-            f"{save_result}\n"
             f"Scraping completed successfully."
         )
 
     except Exception as e:
-
-        print(
-            "Error:",
-            e
-        )
-
-        logging.exception(
-            "Scraper error: %s",
-            e
-        )
-
+        logging.error("Scraper error: %s", e)
+        print(f"Scraper error: {e}")
         raise
-
-    finally:
-
-        await browser.close()
-
-        logging.info(
-            "Browser closed"
-        )
-```
-
-# ============================================================
-
-# PROGRAM START
-
-# ============================================================
-
-if **name** == "**main**":
-
-```
-asyncio.run(
-    scrape_naukri()
-)
-```
+if __name__ == "__main__":
+    asyncio.run(scrape_naukri())
