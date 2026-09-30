@@ -1,5 +1,6 @@
 from flask import Flask
 import asyncio
+import os
 from naukri_scraper import scrape_naukri
 
 app = Flask(__name__)
@@ -60,4 +61,5 @@ def run_scraper():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
