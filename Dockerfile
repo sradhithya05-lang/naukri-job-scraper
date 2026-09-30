@@ -6,8 +6,10 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update && apt-get install -y xvfb
+
 RUN python -m playwright install --with-deps chromium
 
 COPY . .
 
-CMD ["python", "app.py"]
+CMD ["xvfb-run", "-a", "python", "app.py"]

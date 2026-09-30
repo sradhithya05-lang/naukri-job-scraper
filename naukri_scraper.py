@@ -144,11 +144,9 @@ async def scrape_naukri():
 
     try:
         async with async_playwright() as p:
-            is_render = os.environ.get("RENDER") == "true"
-
             browser = await p.chromium.launch(
-                headless=is_render,
-                args=[
+               headless=False,
+               args=[
         "--disable-blink-features=AutomationControlled"
     ]
 )
